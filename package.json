@@ -1,0 +1,14 @@
+{
+  "name": "universo-de-van-gogh-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "PWA romántica para invitación al Universo de Van Gogh.",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "web-push": "^3.6.7"
+  }
+}

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#081a34" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Van Gogh" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="msapplication-TileColor" content="#081a34" />
+  <meta name="description" content="Invitación interactiva y romántica al Universo de Van Gogh." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="icon" href="icon.svg" />
+  <title>Universo de Van Gogh</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-1: #061224;
+      --bg-2: #0b2b5b;
+      --bg-3: #123f78;
+      --gold: #f7d26a;
+      --gold-2: #ffef9d;
+      --cream: #fff6df;
+      --blue: #bfd8ff;
+      --ink: #f2f7ff;
+      --card: rgba(7, 15, 35, 0.58);
+      --card-border: rgba(255, 255, 255, 0.14);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      --radius: 28px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(247, 210, 106, 0.22), transparent 18%),
+        radial-gradient(circle at 80% 24%, rgba(255, 239, 157, 0.15), transparent 16%),
+        radial-gradient(circle at 50% 78%, rgba(74, 136, 255, 0.22), transparent 26%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      color: var(--ink);
+    }
+
+    body {
+      min-height: 100dvh;
+      position: relative;
+      touch-action: manipulation;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 15% 35%, rgba(247, 210, 106, 0.23), transparent 0 16%),
+        radial-gradient(circle at 65% 22%, rgba(255, 245, 196, 0.22), transparent 0 12%),
+        radial-gradient(circle at 82% 74%, rgba(255, 210, 108, 0.15), transparent 0 14%),
+        radial-gradient(circle at 42% 82%, rgba(113, 165, 255, 0.12), transparent 0 16%);
+      filter: blur(18px);
+      animation: floatGlow 18s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      background:
+        linear-gradient(120deg, transparent 0 29%, rgba(255, 241, 183, 0.08) 30%, transparent 31% 63%, rgba(255, 216, 110, 0.08) 64%, transparent 65%),
+        radial-gradient(circle at 50% 50%, transparent 58%, rgba(4, 9, 18, 0.25) 100%);
+      mix-blend-mode: screen;
+      animation: swirlDrift 22s linear infinite;
+      opacity: 0.9;
+    }
+
+    .app {
+      position: relative;
+      width: 100%;
+      min-height: 100dvh;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+      display: grid;
+      place-items: center;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    .star {
+      position: absolute;
+      width: var(--size);
+      height: var(--size);
+      left: var(--x);
+      top: var(--y);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.96) 0 18%, rgba(255, 239, 157, 0.9) 23%, rgba(255, 199, 73, 0.0) 70%);
+      box-shadow: 0 0 16px rgba(255, 236, 167, 0.62), 0 0 38px rgba(247, 210, 106, 0.2);
+      animation: twinkle var(--duration) ease-in-out infinite alternate;
+      transform: translateZ(0);
+    }
+
+    .star::before,
+    .star::after {
+      content: "";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(90deg, transparent, rgba(255, 241, 183, 0.95), transparent);
+      border-radius: 999px;
+      opacity: 0.7;
+    }
+
+    .star::before {
+      width: calc(var(--size) * 2.6);
+      height: 2px;
+    }
+
+    .star::after {
+      width: 2px;
+      height: calc(var(--size) * 2.6);
+    }
+
+    .panel {
+      position: relative;
+      width: min(92vw, 440px);
+      min-height: min(74vh, 680px);
+      padding: 28px 22px 24px;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(14, 27, 54, 0.60), rgba(5, 10, 24, 0.72)),
+        radial-gradient(circle at top, rgba(255, 220, 120, 0.08), transparent 34%);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      isolation: isolate;
+      transform: translateZ(0);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -25%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255, 224, 132, 0.12), transparent 18%),
+        radial-gradient(circle at 76% 18%, rgba(154, 190, 255, 0.13), transparent 20%),
+        radial-gradient(circle at 55% 84%, rgba(255, 212, 110, 0.09), transparent 22%);
+      filter: blur(14px);
+      animation: panelAura 12s ease-in-out infinite alternate;
+      z-index: -2;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(115deg, transparent 0 23%, rgba(255,255,255,0.06) 24%, transparent 25% 51%, rgba(255,255,255,0.04) 52%, transparent 53% 100%);
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 30px 22px 26px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 22px;
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      pointer-events: none;
+      transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
+    }
+
+    .screen.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 234, 168, 0.18);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--gold-2);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(2rem, 6.8vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.04em;
+      color: var(--cream);
+      text-wrap: balance;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.34);
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 28ch;
+      font-size: clamp(1rem, 3.8vw, 1.13rem);
+      line-height: 1.5;
+      color: rgba(242, 247, 255, 0.88);
+      text-wrap: balance;
+    }
+
+    .buttons {
+      position: relative;
+      width: min(100%, 320px);
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      gap: 14px;
+    }
+
+    .push-action {
+      min-width: min(100%, 260px);
+      min-height: 48px;
+      padding-inline: 18px;
+      font-size: 0.92rem;
+    }
+
+    .push-note {
+      margin: 0;
+      max-width: 28ch;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      color: rgba(242, 247, 255, 0.75);
+    }
+
+    .button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      min-height: 56px;
+      min-width: 132px;
+      padding: 0 24px;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #13233d;
+      background: linear-gradient(180deg, #fff6cb, #f8d56c);
+      box-shadow: 0 12px 30px rgba(247, 210, 106, 0.25), inset 0 1px 0 rgba(255,255,255,0.55);
+      transform: translateZ(0);
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 220ms ease, filter 220ms ease;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    .button:active {
+      transform: scale(0.97);
+      box-shadow: 0 8px 20px rgba(247, 210, 106, 0.18);
+    }
+
+    .button:focus-visible {
+      outline: 3px solid rgba(255, 239, 157, 0.9);
+      outline-offset: 4px;
+    }
+
+    .button.secondary {
+      color: var(--cream);
+      background: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255, 234, 168, 0.22);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .button.date {
+      width: min(100%, 220px);
+      margin-inline: auto;
+    }
+
+    .floating-no {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform, opacity, left, top;
+      z-index: 3;
+    }
+
+    .dates {
+      width: min(100%, 270px);
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .final-art {
+      display: grid;
+      gap: 18px;
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+    }
+
+    .sparkle-ring {
+      position: relative;
+      width: 154px;
+      height: 154px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 239, 157, 0.18) 0 26%, transparent 26% 100%),
+        radial-gradient(circle, rgba(255, 228, 157, 0.18), rgba(255, 228, 157, 0) 65%);
+      box-shadow: inset 0 0 30px rgba(255, 239, 157, 0.12), 0 0 60px rgba(247, 210, 106, 0.12);
+    }
+
+    .sparkle-ring::before,
+    .sparkle-ring::after {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 238, 167, 0.16);
+      animation: ringPulse 3.8s ease-in-out infinite;
+    }
+
+    .sparkle-ring::after {
+      inset: -36px;
+      animation-delay: 0.9s;
+    }
+
+    .final-title {
+      font-size: clamp(1.85rem, 6.2vw, 2.65rem);
+      line-height: 1.08;
+      margin: 0;
+      color: #fff7e3;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.34);
+      text-wrap: balance;
+    }
+
+    .final-copy {
+      margin: 0;
+      font-size: clamp(1rem, 4vw, 1.1rem);
+      line-height: 1.55;
+      color: rgba(255, 246, 223, 0.92);
+      max-width: 25ch;
+      text-wrap: balance;
+    }
+
+    .spark {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(255,255,255,1) 0 22%, rgba(255, 239, 157, 0.95) 30%, rgba(255, 191, 90, 0) 72%);
+      box-shadow: 0 0 14px rgba(255, 239, 157, 0.82);
+      animation: sparkFly var(--dur) ease-out forwards;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+      100% { transform: translate3d(2%, 2%, 0) scale(1.08); }
+    }
+
+    @keyframes swirlDrift {
+      0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+      100% { transform: translate3d(0, 0, 0) rotate(360deg); }
+    }
+
+    @keyframes twinkle {
+      0% { transform: scale(0.78); opacity: 0.55; }
+      100% { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes panelAura {
+      0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+      100% { transform: translate3d(2%, 2%, 0) scale(1.06); }
+    }
+
+    @keyframes ringPulse {
+      0% { transform: scale(0.96); opacity: 0.36; }
+      100% { transform: scale(1.14); opacity: 0.04; }
+    }
+
+    @keyframes sparkFly {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.4) rotate(0deg);
+      }
+      15% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(240deg);
+      }
+    }
+
+    @media (min-width: 430px) {
+      .panel {
+        width: min(88vw, 440px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true" id="stars"></div>
+
+  <main class="app">
+    <section class="panel" aria-live="polite" aria-atomic="true">
+      <div class="screen active" id="screen-invite">
+        <div class="badge">Universo de Van Gogh</div>
+        <h1 class="title">linda te invito a una noche entre estrellas y arte</h1>
+        <p class="subtitle">vamos a vivir la exposición del Universo de Van Gogh, con un sí que se sienta tan bonita como tu.</p>
+        <div class="buttons" id="inviteButtons">
+          <button class="button" id="yesBtn" type="button">Sí</button>
+          <button class="button secondary floating-no" id="noBtn" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="screen" id="screen-dates">
+        <div class="badge">Confirmación</div>
+        <h2 class="title">Sabía que sí querías, hermosa</h2>
+        <p class="subtitle">Elige el día que mejor te quede para nuestra cita con Van Gogh.</p>
+        <div class="dates" id="dateChoices">
+          <button class="button date" type="button" data-date="Sábado 27">Sábado 27</button>
+          <button class="button date" type="button" data-date="Domingo 28">Domingo 28</button>
+        </div>
+      </div>
+
+      <div class="screen" id="screen-final">
+        <div class="final-art">
+          <div class="sparkle-ring" aria-hidden="true"></div>
+          <div class="badge">Listo para brillar</div>
+          <h2 class="final-title">¡Muchas gracias, hermosa! Ponte tu outfit para ese día especialllllll ✨🌻</h2>
+          <p class="final-copy" id="finalDateText"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const starsLayer = document.getElementById('stars');
+    const inviteScreen = document.getElementById('screen-invite');
+    const datesScreen = document.getElementById('screen-dates');
+    const finalScreen = document.getElementById('screen-final');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const inviteButtons = document.getElementById('inviteButtons');
+    const finalDateText = document.getElementById('finalDateText');
+    const dateButtons = Array.from(document.querySelectorAll('[data-date]'));
+    const pushSetupMode = new URLSearchParams(window.location.search).get('setup') === '1';
+
+    let noAttempts = 0;
+    let noGone = false;
+    let sparkTimer = null;
+
+    function createStars() {
+      const count = 28;
+      for (let index = 0; index < count; index += 1) {
+        const star = document.createElement('span');
+        star.className = 'star';
+        star.style.setProperty('--x', `${Math.random() * 100}vw`);
+        star.style.setProperty('--y', `${Math.random() * 100}vh`);
+        star.style.setProperty('--size', `${6 + Math.random() * 15}px`);
+        star.style.setProperty('--duration', `${2.4 + Math.random() * 4.6}s`);
+        star.style.animationDelay = `${Math.random() * 3.8}s`;
+        starsLayer.appendChild(star);
+      }
+    }
+
+    function showScreen(activeScreen) {
+      [inviteScreen, datesScreen, finalScreen].forEach((screen) => {
+        screen.classList.toggle('active', screen === activeScreen);
+      });
+    }
+
+    function moveNoButton() {
+      if (noGone) {
+        return;
+      }
+
+      noAttempts += 1;
+      const panelRect = inviteButtons.getBoundingClientRect();
+      const buttonRect = noBtn.getBoundingClientRect();
+      const padding = 18;
+      const availableWidth = Math.max(0, panelRect.width - buttonRect.width - padding * 2);
+      const availableHeight = Math.max(0, panelRect.height - buttonRect.height - padding * 2);
+      const nextLeft = padding + Math.random() * availableWidth;
+      const nextTop = padding + Math.random() * availableHeight;
+      const scale = Math.max(0, 1 - noAttempts * 0.13);
+      const opacity = Math.max(0, 1 - noAttempts * 0.22);
+
+      noBtn.style.left = `${nextLeft}px`;
+      noBtn.style.top = `${nextTop}px`;
+      noBtn.style.opacity = String(opacity);
+      noBtn.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      noBtn.style.filter = `blur(${Math.max(0, noAttempts - 2) * 0.3}px)`;
+
+      if (opacity <= 0.08 || scale <= 0.32) {
+        noGone = true;
+        noBtn.classList.add('hidden');
+      }
+    }
+
+    function placeNoButtonInitial() {
+      const panelRect = inviteButtons.getBoundingClientRect();
+      const buttonRect = noBtn.getBoundingClientRect();
+      const padding = 18;
+      const availableWidth = Math.max(0, panelRect.width - buttonRect.width - padding * 2);
+      const availableHeight = Math.max(0, panelRect.height - buttonRect.height - padding * 2);
+      const nextLeft = padding + availableWidth * 0.74;
+      const nextTop = padding + availableHeight * 0.62;
+
+      noBtn.style.left = `${nextLeft}px`;
+      noBtn.style.top = `${nextTop}px`;
+      noBtn.style.transform = 'translate(-50%, -50%) scale(1)';
+    }
+
+    function burstStars(originX, originY) {
+      for (let index = 0; index < 24; index += 1) {
+        const spark = document.createElement('span');
+        spark.className = 'spark';
+        spark.style.left = `${originX}px`;
+        spark.style.top = `${originY}px`;
+        spark.style.setProperty('--dx', `${(Math.random() - 0.5) * 220}px`);
+        spark.style.setProperty('--dy', `${(Math.random() - 0.9) * 260}px`);
+        spark.style.setProperty('--dur', `${900 + Math.random() * 900}ms`);
+        spark.style.width = `${6 + Math.random() * 8}px`;
+        spark.style.height = spark.style.width;
+        document.body.appendChild(spark);
+        window.setTimeout(() => spark.remove(), 2000);
+      }
+    }
+
+    function startSparkleLoop() {
+      stopSparkleLoop();
+      sparkTimer = window.setInterval(() => {
+        const x = window.innerWidth * (0.18 + Math.random() * 0.64);
+        const y = window.innerHeight * (0.14 + Math.random() * 0.56);
+        burstStars(x, y);
+      }, 620);
+    }
+
+    function stopSparkleLoop() {
+      if (sparkTimer) {
+        window.clearInterval(sparkTimer);
+        sparkTimer = null;
+      }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let index = 0; index < rawData.length; index += 1) {
+        outputArray[index] = rawData.charCodeAt(index);
+      }
+
+      return outputArray;
+    }
+
+    async function enablePushOnThisPhone() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        return;
+      }
+
+      const configResponse = await fetch('./api/config');
+      if (!configResponse.ok) {
+        throw new Error('No se pudo leer la configuración de push.');
+      }
+
+      const { publicKey } = await configResponse.json();
+      const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+      const existingSubscription = await serviceWorkerRegistration.pushManager.getSubscription();
+      const subscription = existingSubscription || await serviceWorkerRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+
+      const subscribeResponse = await fetch('./api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription })
+      });
+
+      if (!subscribeResponse.ok) {
+        throw new Error('No se pudo guardar la suscripción.');
+      }
+    }
+
+    yesBtn.addEventListener('click', () => {
+      showScreen(datesScreen);
+      startSparkleLoop();
+    });
+
+    noBtn.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      moveNoButton();
+    });
+
+    noBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      moveNoButton();
+    });
+
+    dateButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const selectedDate = button.dataset.date;
+        finalDateText.textContent = `Elegiste ${selectedDate}. Yo ya lo estoy esperando con mucha ilusión.`;
+        fetch('./api/rsvp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: selectedDate })
+        }).catch(() => {});
+        showScreen(finalScreen);
+        stopSparkleLoop();
+        burstStars(window.innerWidth * 0.5, window.innerHeight * 0.26);
+        burstStars(window.innerWidth * 0.34, window.innerHeight * 0.58);
+        burstStars(window.innerWidth * 0.66, window.innerHeight * 0.58);
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      if (!noGone && inviteScreen.classList.contains('active')) {
+        placeNoButtonInitial();
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    if (pushSetupMode) {
+      window.addEventListener('load', () => {
+        enablePushOnThisPhone().catch(() => {});
+      });
+    }
+
+    createStars();
+    placeNoButtonInitial();
+  </script>
+</body>
+</html>
