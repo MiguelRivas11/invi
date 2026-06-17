@@ -609,6 +609,18 @@
         </div>
       </div>
 
+      <div class="screen" id="screen-time">
+        <div class="badge">⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰</div>
+        <h2 class="title">¿A qué hora te gustaria ir?</h2>
+        <p class="subtitle">Elige una opción para dejarlo más claro o dinos que en la tarde te va mejor.</p>
+        <div class="dates" id="timeChoices">
+          <button class="button date" type="button" data-time="8:00 PM">8:00 PM</button>
+          <button class="button date" type="button" data-time="8:30 PM">8:30 PM</button>
+          <button class="button date" type="button" data-time="9:00 PM">9:00 PM</button>
+          <button class="button date" type="button" data-time="En la tarde mejor">En la tarde mejor</button>
+        </div>
+      </div>
+
       <div class="screen" id="screen-final">
         <div class="final-art">
           <div class="sparkle-ring" aria-hidden="true"></div>
@@ -624,12 +636,17 @@
     const starsLayer = document.getElementById('stars');
     const inviteScreen = document.getElementById('screen-invite');
     const datesScreen = document.getElementById('screen-dates');
+    const timeScreen = document.getElementById('screen-time');
     const finalScreen = document.getElementById('screen-final');
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
     const inviteButtons = document.getElementById('inviteButtons');
     const finalDateText = document.getElementById('finalDateText');
     const dateButtons = Array.from(document.querySelectorAll('[data-date]'));
+    const timeButtons = Array.from(document.querySelectorAll('[data-time]'));
+
+    let selectedDate = '';
+    let selectedTime = '';
 
     let noAttempts = 0;
     let sparkTimer = null;
@@ -649,7 +666,7 @@
     }
 
     function showScreen(activeScreen) {
-      [inviteScreen, datesScreen, finalScreen].forEach((screen) => {
+      [inviteScreen, datesScreen, timeScreen, finalScreen].forEach((screen) => {
         screen.classList.toggle('active', screen === activeScreen);
       });
     }
@@ -740,12 +757,21 @@
 
     dateButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const selectedDate = button.dataset.date;
-        finalDateText.textContent = `Elegiste ${selectedDate}. Yo ya lo estoy esperando con mucha ilusión.`;
+        selectedDate = button.dataset.date;
+        showScreen(timeScreen);
+        stopSparkleLoop();
+        burstStars(window.innerWidth * 0.5, window.innerHeight * 0.26);
+      });
+    });
+
+    timeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedTime = button.dataset.time;
+        finalDateText.textContent = `Elegiste ${selectedDate} a ${selectedTime}. Yo ya lo estoy esperando con mucha ilusión.`;
         fetch('./api/rsvp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ date: selectedDate })
+          body: JSON.stringify({ date: selectedDate, time: selectedTime })
         }).catch(() => {});
         showScreen(finalScreen);
         stopSparkleLoop();

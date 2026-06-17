@@ -20,12 +20,14 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const { date } = parseBody(req.body);
+  const { date, time } = parseBody(req.body);
 
   if (!date) {
     res.status(400).json({ error: 'Missing date' });
     return;
   }
+
+  const selectedTime = time || 'sin hora definida';
 
   const resendApiKey = process.env.RESEND_API_KEY;
   const emailTo = process.env.EMAIL_TO;
@@ -45,11 +47,11 @@ module.exports = async function handler(req, res) {
     body: JSON.stringify({
       from: emailFrom,
       to: [emailTo],
-      subject: `Ella eligió ${date} para el Universo de Van Gogh`,
+      subject: `Ella eligió ${date} a ${selectedTime} para el Universo de Van Gogh`,
       html: `
         <div style="font-family: Georgia, serif; line-height: 1.6; color: #10233d;">
           <h2 style="margin: 0 0 12px;">Nueva confirmación</h2>
-          <p style="margin: 0 0 12px;">Ella eligió <strong>${date}</strong> para la salida al Universo de Van Gogh.</p>
+          <p style="margin: 0 0 12px;">Ella eligió <strong>${date}</strong> a <strong>${selectedTime}</strong> para la salida al Universo de Van Gogh.</p>
           <p style="margin: 0;">Revisa la invitación para seguir con el plan romántico.</p>
         </div>
       `
