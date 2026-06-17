@@ -181,13 +181,13 @@
 
     .panel {
       position: relative;
-      width: min(92vw, 440px);
+      width: min(90vw, 420px);
       min-height: min(74vh, 680px);
       padding: 28px 22px 24px;
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       background:
-        linear-gradient(180deg, rgba(14, 27, 54, 0.60), rgba(5, 10, 24, 0.72)),
+        linear-gradient(180deg, rgba(14, 27, 54, 0.42), rgba(5, 10, 24, 0.54)),
         radial-gradient(circle at top, rgba(255, 220, 120, 0.08), transparent 34%);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px) saturate(130%);
@@ -205,10 +205,10 @@
       position: absolute;
       inset: -25%;
       background:
-        radial-gradient(circle at 20% 30%, rgba(255, 224, 132, 0.12), transparent 18%),
-        radial-gradient(circle at 76% 18%, rgba(154, 190, 255, 0.13), transparent 20%),
-        radial-gradient(circle at 55% 84%, rgba(255, 212, 110, 0.09), transparent 22%);
-      filter: blur(14px);
+        radial-gradient(circle at 20% 30%, rgba(255, 224, 132, 0.08), transparent 18%),
+        radial-gradient(circle at 76% 18%, rgba(154, 190, 255, 0.08), transparent 20%),
+        radial-gradient(circle at 55% 84%, rgba(255, 212, 110, 0.06), transparent 22%);
+      filter: blur(10px);
       animation: panelAura 12s ease-in-out infinite alternate;
       z-index: -2;
     }
@@ -461,35 +461,47 @@
 
     @media (max-width: 420px) {
       .panel {
-        width: min(94vw, 420px);
-        min-height: min(78vh, 700px);
-        padding: 22px 16px 18px;
+        width: min(86vw, 350px);
+        min-height: min(68vh, 560px);
+        padding: 18px 14px 16px;
       }
 
       .screen {
-        padding: 24px 16px 20px;
-        gap: 18px;
+        padding: 20px 14px 18px;
+        gap: 14px;
       }
 
       .buttons {
-        width: min(100%, 290px);
-        min-height: 82px;
-        gap: 10px;
+        width: min(100%, 250px);
+        min-height: 76px;
+        gap: 8px;
       }
 
       .title {
-        font-size: clamp(1.8rem, 7vw, 2.5rem);
+        font-size: clamp(1.55rem, 6.4vw, 2.15rem);
       }
 
       .subtitle {
-        font-size: 0.98rem;
-        max-width: 24ch;
+        font-size: 0.9rem;
+        max-width: 22ch;
+      }
+
+      .badge {
+        font-size: 0.64rem;
+        padding: 8px 12px;
+      }
+
+      .button {
+        min-height: 50px;
+        min-width: 110px;
+        padding: 0 18px;
+        font-size: 0.92rem;
       }
     }
 
     @media (min-width: 768px) {
       .panel {
-        width: min(72vw, 620px);
+        width: min(64vw, 580px);
         min-height: min(78vh, 760px);
         padding: 34px 34px 30px;
       }
@@ -569,8 +581,8 @@
 <body>
   <div class="bg-fallback" aria-hidden="true"></div>
   <video class="bg-video" autoplay muted loop playsinline preload="auto" poster="image.png" aria-hidden="true">
-    <source src="fondo.webm" type="video/webm" />
-    <source src="fondo.mp4" type="video/mp4" />
+    <source src="fondo.webm?v=2" type="video/webm" />
+    <source src="fondo.mp4?v=2" type="video/mp4" />
   </video>
   <div class="bg-video-overlay" aria-hidden="true"></div>
   <div class="stars" aria-hidden="true" id="stars"></div>
