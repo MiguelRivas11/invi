@@ -1,8 +1,3 @@
-const webpush = require('web-push');
-const { kv } = require('@vercel/kv');
-
-const STORAGE_KEY = 'van-gogh:push-subscriptions';
-
 function parseBody(body) {
   if (!body) {
     return {};
@@ -19,32 +14,6 @@ function parseBody(body) {
   return body;
 }
 
-function getMemoryStore() {
-  if (!globalThis.__vanGoghPushStore) {
-    globalThis.__vanGoghPushStore = new Map();
-  }
-
-  return globalThis.__vanGoghPushStore;
-}
-
-async function getSubscriptions() {
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-    const entries = await kv.hgetall(STORAGE_KEY);
-    return Object.values(entries || {}).map((entry) => JSON.parse(entry));
-  }
-
-  return Array.from(getMemoryStore().values());
-}
-
-async function removeSubscription(endpoint) {
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-    await kv.hdel(STORAGE_KEY, endpoint);
-    return;
-  }
-
-  getMemoryStore().delete(endpoint);
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -58,43 +27,40 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-  const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:hello@example.com';
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const emailTo = process.env.EMAIL_TO;
+  const emailFrom = process.env.EMAIL_FROM;
 
-  if (!vapidPublicKey || !vapidPrivateKey) {
-    res.status(500).json({ error: 'Missing VAPID keys' });
+  if (!resendApiKey || !emailTo || !emailFrom) {
+    res.status(500).json({ error: 'Missing email configuration' });
     return;
   }
 
-  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-
-  const subscriptions = await getSubscriptions();
-  const payload = JSON.stringify({
-    title: 'Universo de Van Gogh',
-    body: `Eligieron ${date}. Abre la invitación para verla.`,
-    url: './'
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: emailFrom,
+      to: [emailTo],
+      subject: `Ella eligió ${date} para el Universo de Van Gogh`,
+      html: `
+        <div style="font-family: Georgia, serif; line-height: 1.6; color: #10233d;">
+          <h2 style="margin: 0 0 12px;">Nueva confirmación</h2>
+          <p style="margin: 0 0 12px;">Ella eligió <strong>${date}</strong> para la salida al Universo de Van Gogh.</p>
+          <p style="margin: 0;">Revisa la invitación para seguir con el plan romántico.</p>
+        </div>
+      `
+    })
   });
 
-  const results = await Promise.allSettled(
-    subscriptions.map(async (subscription) => {
-      try {
-        await webpush.sendNotification(subscription, payload);
-        return { ok: true };
-      } catch (error) {
-        const statusCode = error && error.statusCode;
+  if (!response.ok) {
+    const errorText = await response.text();
+    res.status(500).json({ error: 'Email send failed', details: errorText });
+    return;
+  }
 
-        if (statusCode === 404 || statusCode === 410) {
-          await removeSubscription(subscription.endpoint);
-        }
-
-        throw error;
-      }
-    })
-  );
-
-  const sent = results.filter((result) => result.status === 'fulfilled').length;
-  const failed = results.length - sent;
-
-  res.status(200).json({ ok: true, sent, failed });
+  res.status(200).json({ ok: true });
 };
