@@ -767,7 +767,7 @@
     timeButtons.forEach((button) => {
       button.addEventListener('click', () => {
         selectedTime = button.dataset.time;
-        finalDateText.textContent = `Elegiste ${selectedDate} a ${selectedTime}. Yo ya lo estoy esperando con mucha ilusión.`;
+        finalDateText.textContent = `Elegiste ${selectedDate} a ${selectedTime}. Yo ya lo estoy esperando con mucha ilusión. para tomarte muchas fotitos🌹`;
         fetch('./api/rsvp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
