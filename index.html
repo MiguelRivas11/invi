@@ -43,13 +43,10 @@
       min-height: 100%;
       margin: 0;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 18% 18%, rgba(247, 210, 106, 0.22), transparent 18%),
-        radial-gradient(circle at 80% 24%, rgba(255, 239, 157, 0.15), transparent 16%),
-        radial-gradient(circle at 50% 78%, rgba(74, 136, 255, 0.22), transparent 26%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+      background: #061224;
       font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
       color: var(--ink);
+      isolation: isolate;
     }
 
     body {
@@ -60,35 +57,74 @@
       text-rendering: optimizeLegibility;
     }
 
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      object-position: center center;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.98;
+      filter: saturate(1.18) contrast(1.08) brightness(0.92);
+      transform: scale(1.04);
+    }
+
+    .bg-fallback {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        url('image.png') center center / cover no-repeat,
+        linear-gradient(180deg, rgba(6, 18, 36, 0.10), rgba(6, 18, 36, 0.18));
+      filter: saturate(1.05) contrast(1.05) brightness(0.88);
+    }
+
+    .bg-video-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(247, 210, 106, 0.14), transparent 18%),
+        radial-gradient(circle at 80% 24%, rgba(255, 239, 157, 0.09), transparent 16%),
+        radial-gradient(circle at 50% 78%, rgba(74, 136, 255, 0.14), transparent 26%),
+        linear-gradient(180deg, rgba(6, 18, 36, 0.12), rgba(6, 18, 36, 0.24));
+    }
+
     body::before,
     body::after {
       content: "";
       position: fixed;
       inset: -20%;
       pointer-events: none;
+      z-index: 1;
     }
 
     body::before {
       background:
-        radial-gradient(circle at 15% 35%, rgba(247, 210, 106, 0.23), transparent 0 16%),
-        radial-gradient(circle at 65% 22%, rgba(255, 245, 196, 0.22), transparent 0 12%),
-        radial-gradient(circle at 82% 74%, rgba(255, 210, 108, 0.15), transparent 0 14%),
-        radial-gradient(circle at 42% 82%, rgba(113, 165, 255, 0.12), transparent 0 16%);
+        radial-gradient(circle at 15% 35%, rgba(247, 210, 106, 0.14), transparent 0 16%),
+        radial-gradient(circle at 65% 22%, rgba(255, 245, 196, 0.13), transparent 0 12%),
+        radial-gradient(circle at 82% 74%, rgba(255, 210, 108, 0.09), transparent 0 14%),
+        radial-gradient(circle at 42% 82%, rgba(113, 165, 255, 0.08), transparent 0 16%);
       filter: blur(18px);
       animation: floatGlow 18s ease-in-out infinite alternate;
     }
 
     body::after {
       background:
-        linear-gradient(120deg, transparent 0 29%, rgba(255, 241, 183, 0.08) 30%, transparent 31% 63%, rgba(255, 216, 110, 0.08) 64%, transparent 65%),
-        radial-gradient(circle at 50% 50%, transparent 58%, rgba(4, 9, 18, 0.25) 100%);
+        linear-gradient(120deg, transparent 0 29%, rgba(255, 241, 183, 0.05) 30%, transparent 31% 63%, rgba(255, 216, 110, 0.05) 64%, transparent 65%),
+        radial-gradient(circle at 50% 50%, transparent 58%, rgba(4, 9, 18, 0.14) 100%);
       mix-blend-mode: screen;
       animation: swirlDrift 22s linear infinite;
-      opacity: 0.9;
+      opacity: 0.55;
     }
 
     .app {
       position: relative;
+      z-index: 3;
       width: 100%;
       min-height: 100dvh;
       padding:
@@ -106,6 +142,7 @@
       overflow: hidden;
       pointer-events: none;
       opacity: 0.9;
+      z-index: 2;
     }
 
     .star {
@@ -243,10 +280,12 @@
     .buttons {
       position: relative;
       width: min(100%, 320px);
-      min-height: 220px;
-      display: grid;
-      place-items: center;
-      gap: 14px;
+      min-height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
     }
 
     .button {
@@ -294,9 +333,9 @@
 
     .floating-no {
       position: absolute;
-      left: 50%;
+      left: auto;
       top: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(0, -50%);
       will-change: transform, opacity, left, top;
       z-index: 3;
     }
@@ -420,6 +459,103 @@
       }
     }
 
+    @media (max-width: 420px) {
+      .panel {
+        width: min(94vw, 420px);
+        min-height: min(78vh, 700px);
+        padding: 22px 16px 18px;
+      }
+
+      .screen {
+        padding: 24px 16px 20px;
+        gap: 18px;
+      }
+
+      .buttons {
+        width: min(100%, 290px);
+        min-height: 82px;
+        gap: 10px;
+      }
+
+      .title {
+        font-size: clamp(1.8rem, 7vw, 2.5rem);
+      }
+
+      .subtitle {
+        font-size: 0.98rem;
+        max-width: 24ch;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .panel {
+        width: min(72vw, 620px);
+        min-height: min(78vh, 760px);
+        padding: 34px 34px 30px;
+      }
+
+      .screen {
+        padding: 36px 34px 32px;
+        gap: 26px;
+      }
+
+      .buttons {
+        width: min(100%, 380px);
+        min-height: 96px;
+        gap: 14px;
+      }
+
+      .title {
+        font-size: clamp(2.35rem, 4.4vw, 3.4rem);
+      }
+
+      .subtitle {
+        font-size: 1.12rem;
+        max-width: 30ch;
+      }
+
+      .badge {
+        font-size: 0.78rem;
+        padding: 11px 16px;
+      }
+
+      .button {
+        min-height: 58px;
+        min-width: 144px;
+      }
+
+      .button.date {
+        min-width: 240px;
+      }
+
+      .final-title {
+        font-size: clamp(2.1rem, 4vw, 3rem);
+      }
+
+      .final-copy {
+        font-size: 1.04rem;
+        max-width: 30ch;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .panel {
+        width: min(58vw, 700px);
+      }
+
+      .buttons {
+        width: min(100%, 420px);
+      }
+
+      .title {
+        font-size: clamp(2.5rem, 3.6vw, 3.8rem);
+      }
+
+      .subtitle {
+        max-width: 34ch;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -431,6 +567,12 @@
   </style>
 </head>
 <body>
+  <div class="bg-fallback" aria-hidden="true"></div>
+  <video class="bg-video" autoplay muted loop playsinline preload="auto" poster="image.png" aria-hidden="true">
+    <source src="fondo.webm" type="video/webm" />
+    <source src="fondo.mp4" type="video/mp4" />
+  </video>
+  <div class="bg-video-overlay" aria-hidden="true"></div>
   <div class="stars" aria-hidden="true" id="stars"></div>
 
   <main class="app">
@@ -458,7 +600,7 @@
       <div class="screen" id="screen-final">
         <div class="final-art">
           <div class="sparkle-ring" aria-hidden="true"></div>
-          <div class="badge">Listo para brillar</div>
+          <div class="badge">Lista para brillar</div>
           <h2 class="final-title">¡Muchas gracias, hermosa! Ponte tu outfit para ese día especialllllll ✨🌻</h2>
           <p class="final-copy" id="finalDateText"></p>
         </div>
@@ -478,7 +620,6 @@
     const dateButtons = Array.from(document.querySelectorAll('[data-date]'));
 
     let noAttempts = 0;
-    let noGone = false;
     let sparkTimer = null;
 
     function createStars() {
@@ -502,10 +643,6 @@
     }
 
     function moveNoButton() {
-      if (noGone) {
-        return;
-      }
-
       noAttempts += 1;
       const panelRect = inviteButtons.getBoundingClientRect();
       const buttonRect = noBtn.getBoundingClientRect();
@@ -514,33 +651,32 @@
       const availableHeight = Math.max(0, panelRect.height - buttonRect.height - padding * 2);
       const nextLeft = padding + Math.random() * availableWidth;
       const nextTop = padding + Math.random() * availableHeight;
-      const scale = Math.max(0, 1 - noAttempts * 0.13);
-      const opacity = Math.max(0, 1 - noAttempts * 0.22);
+      const scale = Math.max(0.72, 1 - noAttempts * 0.04);
+      const opacity = Math.max(0.65, 1 - noAttempts * 0.03);
 
       noBtn.style.left = `${nextLeft}px`;
       noBtn.style.top = `${nextTop}px`;
       noBtn.style.opacity = String(opacity);
       noBtn.style.transform = `translate(-50%, -50%) scale(${scale})`;
       noBtn.style.filter = `blur(${Math.max(0, noAttempts - 2) * 0.3}px)`;
-
-      if (opacity <= 0.08 || scale <= 0.32) {
-        noGone = true;
-        noBtn.classList.add('hidden');
-      }
     }
 
     function placeNoButtonInitial() {
-      const panelRect = inviteButtons.getBoundingClientRect();
+      const yesRect = yesBtn.getBoundingClientRect();
       const buttonRect = noBtn.getBoundingClientRect();
-      const padding = 18;
-      const availableWidth = Math.max(0, panelRect.width - buttonRect.width - padding * 2);
-      const availableHeight = Math.max(0, panelRect.height - buttonRect.height - padding * 2);
-      const nextLeft = padding + availableWidth * 0.74;
-      const nextTop = padding + availableHeight * 0.62;
+      const containerRect = inviteButtons.getBoundingClientRect();
+      const gap = 14;
+      const nextLeft = Math.min(
+        containerRect.width - buttonRect.width / 2 - 10,
+        (yesRect.right - containerRect.left) + gap + buttonRect.width / 2
+      );
+      const nextTop = (yesRect.top - containerRect.top) + (yesRect.height / 2);
 
       noBtn.style.left = `${nextLeft}px`;
       noBtn.style.top = `${nextTop}px`;
       noBtn.style.transform = 'translate(-50%, -50%) scale(1)';
+      noBtn.style.opacity = '1';
+      noBtn.style.filter = 'none';
     }
 
     function burstStars(originX, originY) {
@@ -608,7 +744,7 @@
     });
 
     window.addEventListener('resize', () => {
-      if (!noGone && inviteScreen.classList.contains('active')) {
+      if (inviteScreen.classList.contains('active')) {
         placeNoButtonInitial();
       }
     });
